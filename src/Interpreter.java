@@ -13,15 +13,19 @@ public class Interpreter {
     static userOutput userOutput= new userOutput();
     static file file= new file();
 
+    static Queue<Integer> readyQueue = new LinkedList<Integer>();
     static Queue<Integer> blocked = new LinkedList<Integer>();
     static Queue<Integer> inputBlocked = new LinkedList<Integer>();
     static Queue<Integer> outputBlocked = new LinkedList<Integer>();
     static Queue<Integer> fileBlocked = new LinkedList<Integer>();
 
-    static HashMap<Integer, String> programs = new HashMap<Integer, String>();
 
-    static boolean semExist = true;
+    static ArrayList<Pair> programs = new ArrayList<Pair>();
 
+    static boolean semWaitExist = false;
+
+
+    static HashMap<Integer,ArrayList<Pair>> memory = new HashMap<Integer,ArrayList<Pair>>();
 
 
 
@@ -36,13 +40,20 @@ public class Interpreter {
 //    public static void assign(Object x, int y){
 //        x = y;
 //    }
-    public static void assign(Object x, int pid, boolean flag){
-        if(flag){
+    public static void assign(Object x, int pid, boolean waitFlag){
+        if(waitFlag){
             Scanner myObj = new Scanner(System.in);
             String input;
             System.out.println("Enter value:");
             input = myObj.nextLine();
-            x = input;
+            for (int i = 0; i < memory.get(pid).size(); i++) {
+                Pair temp = memory.get(pid).get(i);
+                if (temp.x.equals((String) x)){
+                    memory.get(pid).set(i, new Pair((String) x, input));
+                }
+            }
+
+            semWaitExist = false;
         }
         else {
             if(semWait(userInput, pid)){
@@ -50,24 +61,46 @@ public class Interpreter {
                 String input;
                 System.out.println("Enter value:");
                 input = myObj.nextLine();
-                x = input;
+                for (int i = 0; i < memory.get(pid).size(); i++) {
+                    Pair temp = memory.get(pid).get(i);
+                    if (temp.x.equals((String) x)){
+                        memory.get(pid).set(i, new Pair((String) x, input));
+                    }
+                }
+                semSignal(userInput, pid);
+
             }
         }
 
     }
-    public static void readFile(String x) {
+    public static void assign(Object x, String value, int pid){
+
+        for (int i = 0; i < memory.get(pid).size(); i++) {
+            Pair temp = memory.get(pid).get(i);
+            if (temp.x.equals((String) x)){
+                memory.get(pid).set(i, new Pair((String) x, value));
+            }
+        }
+        }
+    public static String readFile(String x) {
         try {
             File myObj = new File(x);
             Scanner myReader = new Scanner(myObj);
+            String content = "";
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
                 System.out.println(data);
+                content =  content + data + "\n" ;
             }
             myReader.close();
+            return content;
+
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
+            return "An error occurred";
         }
+
     }
     public static void writeFile(Object x, Object y) {
         String s1 = (String) x;
@@ -136,34 +169,74 @@ public class Interpreter {
 
         switch (function){
             case "print":
-                argument1 =Line[1];
+                argument1 ="";
+                for (int i = 0; i < memory.get(pid).size() ; i++) {
+                    Pair temp = memory.get(pid).get(i);
+                    if(temp.x.equals(Line[1])){
+                        argument1 = (String) temp.y;
+                    }
+
+                }
                 print(argument1);
                 break;
 
             case "readFile":
-                argument1 = Line[1];
+                argument1 = "";
+                for (int i = 0; i < memory.get(pid).size() ; i++) {
+                    Pair temp = memory.get(pid).get(i);
+                    if(temp.x.equals(Line[1])){
+                        argument1 = (String) temp.y;
+                    }
+                }
                 readFile(argument1);
                 break;
             case "assign":
                 if(Line.length == 3){
 
                     if(Line[1].equals("a")){
-                        assign(a,pid,semExist);
+                        memory.get(pid).add(new Pair("a", ""));
+                        assign(a,pid,semWaitExist);
                     }else {
-                        assign(b,pid,semExist);
+                        assign(b,pid,semWaitExist);
+                    }
+                }
+                else {
+                    if(Line[1].equals("a")){
+                        String var = Line[3];
+                        String output = readFile(var);
+                        assign(a,output, pid);
                     }
                 }
 
 
                 break;
             case "writeFile":
-                argument1 = Line[1];
-                argument2 = Line[2];
+                argument1 = "";
+                argument2 = "";
+                for (int i = 0; i < memory.get(pid).size() ; i++) {
+                    Pair temp = memory.get(pid).get(i);
+                    if(temp.x.equals(Line[1])){
+                        argument1 = (String) temp.y;
+                    }
+                    if(temp.x.equals(Line[2])){
+                        argument2 = (String) temp.y;
+                    }
+                }
                 writeFile(argument1, argument2);
                 break;
             case "printFromTo":
-                int arg1 = Integer.parseInt(Line[1]);
-                int arg2 = Integer.parseInt(Line[2]);
+                int arg1 = 0;
+                int arg2 = 0;
+                for (int i = 0; i < memory.get(pid).size() ; i++) {
+                    Pair temp = memory.get(pid).get(i);
+                    if(temp.x.equals(Line[1])){
+                        arg1 = (Integer) temp.y;
+                    }
+                    if(temp.x.equals(Line[2])){
+                        arg2 = (Integer) temp.y;
+                    }
+                }
+
                 printFromTo(arg1,arg2);
                 break;
             case "semWait":
@@ -172,21 +245,18 @@ public class Interpreter {
 
                     case "userInput":
                         semWait(userInput, pid);
-                        semExist = false;
+                        semWaitExist = true;
                         break;
                     case "userOutput":
                         semWait(userOutput, pid);
-                        semExist = false;
                         break;
                     case "file":
                         semWait(file, pid);
-                        semExist = false;
                         break;
                 }
                 break;
             case "semSignal":
                 argument1 = Line[1];
-                semExist = true;
                 switch(argument1) {
 
                     case "userInput":
@@ -206,7 +276,12 @@ public class Interpreter {
     public static void execute(int pid){
         try {
 
-            String pathname = programs.get(pid);
+            String pathname = "";
+            for (Pair temp : programs) {
+                if ((Integer) temp.x == pid) {
+                    pathname = (String) temp.y;
+                }
+            }
 
             File myObj = new File(pathname);
             Scanner myReader = new Scanner(myObj);
@@ -225,11 +300,27 @@ public class Interpreter {
             throw new RuntimeException(e);
         }
     }
+    public static void kernel(){
+
+        programs.add(new Pair(1,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_1.txt"));
+        programs.add(new Pair(2,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_2.txt"));
+        programs.add(new Pair(3,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_3.txt"));
+        memory.put(1,new ArrayList<Pair>());
+        memory.put(2,new ArrayList<Pair>());
+        memory.put(3,new ArrayList<Pair>());
+        for (Pair program : programs) {
+            readyQueue.add((Integer)program.x);
+        }
+
+    }
     public static void main(String[] args) {
-        programs.put(1,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_1.txt");
-        programs.put(2,"Program_2.txt");
-        programs.put(3,"Program_3.txt");
+//        programs.put(1,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_1.txt");
+//        programs.put(2,"Program_2.txt");
+//        programs.put(3,"Program_3.txt");
 //        printFromTo(0,2);
+        memory.put(1,new ArrayList<Pair>());
+        memory.put(2,new ArrayList<Pair>());
+        memory.put(3,new ArrayList<Pair>());
         execute(1);
     }
 }
