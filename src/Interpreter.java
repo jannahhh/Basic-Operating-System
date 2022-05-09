@@ -77,19 +77,29 @@ public class Interpreter {
         }
 
     }
-    public void writeFile(Object x, Object y) {
-        String s1 = (String) x;
-        String s2 = (String) y;
-        try {
-            FileWriter myWriter = new FileWriter(s1);
-            myWriter.write(s2);
-            myWriter.close();
-            System.out.println("Successfully wrote to the file.");
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
+
+    public void writeFile (Object x, Object y){
+        String fileName = "src/"+ (String) x + ".txt";
+        String data = (String) y;
+
+            try {
+                File myObj = new File(fileName);
+                if (myObj.createNewFile()) {
+                    System.out.println("File created: " + myObj.getName());
+                    FileWriter myWriter = new FileWriter(fileName);
+                    myWriter.write(data);
+                    myWriter.close();
+                    System.out.println("Successfully wrote to the file.");
+                } else {
+                    System.out.println("File already exists.");
+                }
+            } catch (IOException e) {
+                System.out.println("An error occurred.");
+                e.printStackTrace();
+            }
+
     }
+
     public void printFromTo(int x, int y){
         if(x == y){
             System.out.println("The two numbers are equal!");
@@ -288,8 +298,8 @@ public class Interpreter {
             i.instructionQueue.put((Integer) p.x, new LinkedList<String>());
             i.execute((Integer) p.x);
         }
-        System.out.println(i.programs.size() + " , "+ i.memory.size());
-        System.out.println(i.instructionQueue.size());
+//        System.out.println(i.programs.size() + " , "+ i.memory.size());
+//        System.out.println(i.instructionQueue.size());
 
 
 
