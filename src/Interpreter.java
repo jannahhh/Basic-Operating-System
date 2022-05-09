@@ -37,19 +37,18 @@ public class Interpreter {
         String s = (String) x;
         System.out.println(s);
     }
-//    public static void assign(Object x, int y){
-//        x = y;
-//    }
-    public static void assign(Object x, int pid, boolean waitFlag){
+    public static void assign(String x, int pid, boolean waitFlag){
         if(waitFlag){
             Scanner myObj = new Scanner(System.in);
             String input;
             System.out.println("Enter value:");
             input = myObj.nextLine();
+
             for (int i = 0; i < memory.get(pid).size(); i++) {
                 Pair temp = memory.get(pid).get(i);
-                if (temp.x.equals((String) x)){
-                    memory.get(pid).set(i, new Pair((String) x, input));
+                String var = (String) temp.x;
+                if (var.equals(x)){
+                    memory.get(pid).set(i, new Pair((String) x, (Object) input));
                 }
             }
 
@@ -71,13 +70,12 @@ public class Interpreter {
 
             }
         }
-
     }
-    public static void assign(Object x, String value, int pid){
+    public static void assign(String x, String value, int pid){
 
         for (int i = 0; i < memory.get(pid).size(); i++) {
             Pair temp = memory.get(pid).get(i);
-            if (temp.x.equals((String) x)){
+            if (temp.x.equals(x)){
                 memory.get(pid).set(i, new Pair((String) x, value));
             }
         }
@@ -115,21 +113,19 @@ public class Interpreter {
             e.printStackTrace();
         }
     }
-    public static void printFromTo(Object x, Object y){
-        int n1 = (int) x;
-        int n2 = (int) y;
-        if(n1 == n2){
+    public static void printFromTo(int x, int y){
+        if(x == y){
             System.out.println("The two numbers are equal!");
             return;
         }
         int min;
         int max;
-        if(n1<n2){
-            min = n1;
-            max = n2-1;
+        if(x<y){
+            min = x;
+            max = y-1;
         }else{
-            min = n2;
-            max = n1-1;
+            min = y;
+            max = x-1;
         }
         System.out.println("Our range is:");
         while(min != max){
@@ -165,17 +161,17 @@ public class Interpreter {
         String argument1;
         String argument2;
 
-
-
+        System.out.println(function);
         switch (function){
             case "print":
                 argument1 ="";
+
                 for (int i = 0; i < memory.get(pid).size() ; i++) {
+
                     Pair temp = memory.get(pid).get(i);
                     if(temp.x.equals(Line[1])){
                         argument1 = (String) temp.y;
                     }
-
                 }
                 print(argument1);
                 break;
@@ -192,20 +188,14 @@ public class Interpreter {
                 break;
             case "assign":
                 if(Line.length == 3){
-
-                    if(Line[1].equals("a")){
-                        memory.get(pid).add(new Pair("a", ""));
-                        assign(a,pid,semWaitExist);
-                    }else {
-                        assign(b,pid,semWaitExist);
-                    }
+                    memory.get(pid).add(new Pair(Line[1], ""));
+                    assign(Line[1],pid,semWaitExist);
                 }
                 else {
-                    if(Line[1].equals("a")){
-                        String var = Line[3];
-                        String output = readFile(var);
-                        assign(a,output, pid);
-                    }
+                    memory.get(pid).add(new Pair(Line[1], ""));
+                    String var = Line[3];
+                    String output = readFile(var);
+                    assign(Line[1],output, pid);
                 }
 
 
@@ -227,15 +217,17 @@ public class Interpreter {
             case "printFromTo":
                 int arg1 = 0;
                 int arg2 = 0;
+
                 for (int i = 0; i < memory.get(pid).size() ; i++) {
                     Pair temp = memory.get(pid).get(i);
                     if(temp.x.equals(Line[1])){
-                        arg1 = (Integer) temp.y;
+                        arg1 = Integer.parseInt((String) temp.y);
                     }
                     if(temp.x.equals(Line[2])){
-                        arg2 = (Integer) temp.y;
+                        arg2 = Integer.parseInt((String) temp.y);
                     }
                 }
+
 
                 printFromTo(arg1,arg2);
                 break;
@@ -283,15 +275,16 @@ public class Interpreter {
                 }
             }
 
+
             File myObj = new File(pathname);
             Scanner myReader = new Scanner(myObj);
             String content = "";
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
+                readLine(data,pid);
                 content =  content + data + "\n" ;
             }
 
-            readLine(content, pid);
             myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
@@ -305,12 +298,16 @@ public class Interpreter {
         programs.add(new Pair(1,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_1.txt"));
         programs.add(new Pair(2,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_2.txt"));
         programs.add(new Pair(3,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_3.txt"));
+        programs.add(new Pair(4,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\tempProgram.txt"));
         memory.put(1,new ArrayList<Pair>());
         memory.put(2,new ArrayList<Pair>());
         memory.put(3,new ArrayList<Pair>());
+        memory.put(4,new ArrayList<Pair>());
+
         for (Pair program : programs) {
             readyQueue.add((Integer)program.x);
         }
+        execute(4);
 
     }
     public static void main(String[] args) {
@@ -318,9 +315,13 @@ public class Interpreter {
 //        programs.put(2,"Program_2.txt");
 //        programs.put(3,"Program_3.txt");
 //        printFromTo(0,2);
-        memory.put(1,new ArrayList<Pair>());
-        memory.put(2,new ArrayList<Pair>());
-        memory.put(3,new ArrayList<Pair>());
-        execute(1);
+//        memory.put(1,new ArrayList<Pair>());
+//        memory.put(2,new ArrayList<Pair>());
+//        memory.put(3,new ArrayList<Pair>());
+//        execute(1);
+        programs.add(new Pair(4,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\tempProgram.txt"));
+        memory.put(4,new ArrayList<Pair>());
+        System.out.println(programs.size() + " , "+ memory.size());
+        execute(4);
     }
 }
