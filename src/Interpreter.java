@@ -6,39 +6,34 @@ import java.nio.file.*;
 public class Interpreter {
 
 
-    static Object a;
-    static Object b;
-
-    static userInput userInput= new userInput();
-    static userOutput userOutput= new userOutput();
-    static file file= new file();
-
-    static Queue<Integer> readyQueue = new LinkedList<Integer>();
-    static Queue<Integer> blocked = new LinkedList<Integer>();
-    static Queue<Integer> inputBlocked = new LinkedList<Integer>();
-    static Queue<Integer> outputBlocked = new LinkedList<Integer>();
-    static Queue<Integer> fileBlocked = new LinkedList<Integer>();
 
 
-    static ArrayList<Pair> programs = new ArrayList<Pair>();
+    userInput userInput= new userInput();
+    userOutput userOutput= new userOutput();
+     file file= new file();
 
-    static boolean semWaitExist = false;
+     Queue<Integer> readyQueue = new LinkedList<Integer>();
+     Queue<Integer> blocked = new LinkedList<Integer>();
+     Queue<Integer> inputBlocked = new LinkedList<Integer>();
+     Queue<Integer> outputBlocked = new LinkedList<Integer>();
+     Queue<Integer> fileBlocked = new LinkedList<Integer>();
 
 
-    static HashMap<Integer,ArrayList<Pair>> memory = new HashMap<Integer,ArrayList<Pair>>();
+     ArrayList<Pair> programs = new ArrayList<Pair>();
 
 
 
+     HashMap<Integer,ArrayList<Pair>> memory = new HashMap<Integer,ArrayList<Pair>>();
 
-    public static void print(int x){
-        System.out.println(x);
-    }
-    public static void print(Object x){
+     HashMap<Integer,Queue<String>> instructionQueue = new HashMap<Integer, Queue<String>>();
+
+
+    public void print(Object x){
         String s = (String) x;
         System.out.println(s);
     }
-    public static void assign(String x, int pid, boolean waitFlag){
-        if(waitFlag){
+    public void assign(String x, int pid){
+//            if(inputBlocked.)
             Scanner myObj = new Scanner(System.in);
             String input;
             System.out.println("Enter value:");
@@ -52,26 +47,8 @@ public class Interpreter {
                 }
             }
 
-            semWaitExist = false;
-        }
-        else {
-            if(semWait(userInput, pid)){
-                Scanner myObj = new Scanner(System.in);
-                String input;
-                System.out.println("Enter value:");
-                input = myObj.nextLine();
-                for (int i = 0; i < memory.get(pid).size(); i++) {
-                    Pair temp = memory.get(pid).get(i);
-                    if (temp.x.equals((String) x)){
-                        memory.get(pid).set(i, new Pair((String) x, input));
-                    }
-                }
-                semSignal(userInput, pid);
-
-            }
-        }
     }
-    public static void assign(String x, String value, int pid){
+    public void assign(String x, String value, int pid){
 
         for (int i = 0; i < memory.get(pid).size(); i++) {
             Pair temp = memory.get(pid).get(i);
@@ -80,7 +57,7 @@ public class Interpreter {
             }
         }
         }
-    public static String readFile(String x) {
+    public String readFile(String x) {
         try {
             File myObj = new File(x);
             Scanner myReader = new Scanner(myObj);
@@ -100,7 +77,7 @@ public class Interpreter {
         }
 
     }
-    public static void writeFile(Object x, Object y) {
+    public void writeFile(Object x, Object y) {
         String s1 = (String) x;
         String s2 = (String) y;
         try {
@@ -113,7 +90,7 @@ public class Interpreter {
             e.printStackTrace();
         }
     }
-    public static void printFromTo(int x, int y){
+    public void printFromTo(int x, int y){
         if(x == y){
             System.out.println("The two numbers are equal!");
             return;
@@ -134,7 +111,7 @@ public class Interpreter {
         }
 
     }
-    public static boolean semWait(resource x, int pid){
+    public boolean semWait(resource x, int pid){
 
         if(x.getAvailable()){
             return true;
@@ -152,10 +129,11 @@ public class Interpreter {
             return  false;
         }
     }
-    public static void semSignal(resource x, int pid){
+    public void semSignal(resource x, int pid){
+
         x.setAvailable();
     }
-    public static void readLine(String line, int pid) throws Exception {
+    public void readLine(String line, int pid) throws Exception {
         String[] Line = line.split(" ");
         String function = Line[0];
         String argument1;
@@ -189,7 +167,7 @@ public class Interpreter {
             case "assign":
                 if(Line.length == 3){
                     memory.get(pid).add(new Pair(Line[1], ""));
-                    assign(Line[1],pid,semWaitExist);
+                    assign(Line[1],pid);
                 }
                 else {
                     memory.get(pid).add(new Pair(Line[1], ""));
@@ -237,7 +215,6 @@ public class Interpreter {
 
                     case "userInput":
                         semWait(userInput, pid);
-                        semWaitExist = true;
                         break;
                     case "userOutput":
                         semWait(userOutput, pid);
@@ -265,7 +242,7 @@ public class Interpreter {
 
         }
     }
-    public static void execute(int pid){
+    public void execute(int pid){
         try {
 
             String pathname = "";
@@ -281,7 +258,8 @@ public class Interpreter {
             String content = "";
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
-                readLine(data,pid);
+                instructionQueue.get(pid).add(data);
+//                readLine(data,pid);
                 content =  content + data + "\n" ;
             }
 
@@ -293,35 +271,27 @@ public class Interpreter {
             throw new RuntimeException(e);
         }
     }
-    public static void kernel(){
 
-        programs.add(new Pair(1,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_1.txt"));
-        programs.add(new Pair(2,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_2.txt"));
-        programs.add(new Pair(3,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_3.txt"));
-        programs.add(new Pair(4,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\tempProgram.txt"));
-        memory.put(1,new ArrayList<Pair>());
-        memory.put(2,new ArrayList<Pair>());
-        memory.put(3,new ArrayList<Pair>());
-        memory.put(4,new ArrayList<Pair>());
-
-        for (Pair program : programs) {
-            readyQueue.add((Integer)program.x);
-        }
-        execute(4);
-
-    }
     public static void main(String[] args) {
-//        programs.put(1,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\Program_1.txt");
-//        programs.put(2,"Program_2.txt");
-//        programs.put(3,"Program_3.txt");
-//        printFromTo(0,2);
-//        memory.put(1,new ArrayList<Pair>());
-//        memory.put(2,new ArrayList<Pair>());
-//        memory.put(3,new ArrayList<Pair>());
-//        execute(1);
-        programs.add(new Pair(4,"F:\\SEMESTER 6\\CSEN602 Operating Systems2\\OS_22_Project\\tempProgram.txt"));
-        memory.put(4,new ArrayList<Pair>());
-        System.out.println(programs.size() + " , "+ memory.size());
-        execute(4);
+
+        Interpreter i = new Interpreter();
+        i.programs.add(new Pair(1,"src/Program_1.txt"));
+        i.programs.add(new Pair(2,"src/Program_2.txt"));
+        i.programs.add(new Pair(3,"src/Program_3.txt"));
+        i.programs.add(new Pair(4,"src/tempProgram.txt"));
+        i.memory.put(1,new ArrayList<Pair>());
+        i.memory.put(2,new ArrayList<Pair>());
+        i.memory.put(3,new ArrayList<Pair>());
+        i.memory.put(4,new ArrayList<Pair>());
+        for (Pair p:i.programs
+        ) {
+            i.instructionQueue.put((Integer) p.x, new LinkedList<String>());
+            i.execute((Integer) p.x);
+        }
+        System.out.println(i.programs.size() + " , "+ i.memory.size());
+        System.out.println(i.instructionQueue.size());
+
+
+
     }
 }
