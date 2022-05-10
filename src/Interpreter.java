@@ -26,6 +26,7 @@ public class Interpreter {
      HashMap<Integer,ArrayList<Pair>> memory = new HashMap<Integer,ArrayList<Pair>>();
 
      HashMap<Integer,Queue<String>> instructionQueue = new HashMap<Integer, Queue<String>>();
+     Scheduler scheduler = new Scheduler();
 
     boolean isRunning;
 
@@ -125,6 +126,7 @@ public class Interpreter {
     public boolean semWait(resource x, int pid){
 
         if(x.getAvailable()){
+            x.setAvailable();
             return true;
         }
         else{
@@ -144,14 +146,14 @@ public class Interpreter {
 
         x.setAvailable();
     }
-    public boolean readLine(String line, int pid) throws Exception {
+    public int readLine(String line, int pid) throws Exception {
         isRunning = true;
         String[] Line = line.split(" ");
         String function = Line[0];
         String argument1;
         String argument2;
 
-        System.out.println(function);
+        System.out.println(" "+function);
         switch (function){
             case "print":
                 argument1 ="";
@@ -226,11 +228,21 @@ public class Interpreter {
                 switch(argument1) {
 
                     case "userInput":
-                        return semWait(userInput, pid);
+                        if(! semWait(userInput, pid)){
+                            return 1;
+                        };
+                        break;
                     case "userOutput":
-                        return semWait(userOutput, pid);
+
+                        if(! semWait(userOutput, pid)){
+                            return 1;
+                        };
+                        break;
                     case "file":
-                        return semWait(file, pid);
+                        if(! semWait(file, pid)){
+                            return 1;
+                        };
+                        break;
                 }
                 break;
             case "semSignal":
@@ -239,18 +251,18 @@ public class Interpreter {
 
                     case "userInput":
                         semSignal(userInput, pid);
-                        break;
+                        return 2;
                     case "userOutput":
                         semSignal(userOutput, pid);
-                        break;
+                        return 3;
                     case "file":
                         semSignal(file, pid);
-                        break;
+                        return 4;
                 }
                 break;
-            default: return true;
+            default: return 0;
         }
-        return true;
+        return 0;
     }
     public void execute(int pid){
         try {
@@ -282,22 +294,27 @@ public class Interpreter {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         Interpreter i = new Interpreter();
         i.programs.add(new Pair(1,"src/Program_1.txt"));
         i.programs.add(new Pair(2,"src/Program_2.txt"));
         i.programs.add(new Pair(3,"src/Program_3.txt"));
-        i.programs.add(new Pair(4,"src/tempProgram.txt"));
+
+
         i.memory.put(1,new ArrayList<Pair>());
         i.memory.put(2,new ArrayList<Pair>());
         i.memory.put(3,new ArrayList<Pair>());
-        i.memory.put(4,new ArrayList<Pair>());
+
+
         for (Pair p:i.programs
         ) {
             i.instructionQueue.put((Integer) p.x, new LinkedList<String>());
             i.execute((Integer) p.x);
         }
+        i.scheduler.scheduler(i);
+
+
 //        System.out.println(i.programs.size() + " , "+ i.memory.size());
 //        System.out.println(i.instructionQueue.size());
 
