@@ -2,72 +2,71 @@ import java.io.*;
 import java.util.*;
 
 
-
 public class Interpreter {
 
 
+    userInput userInput = new userInput();
+    userOutput userOutput = new userOutput();
+    file file = new file();
+
+    Queue<Integer> readyQueue = new LinkedList<Integer>();
+    Queue<Integer> blocked = new LinkedList<Integer>();
+    Queue<Integer> inputBlocked = new LinkedList<Integer>();
+    Queue<Integer> outputBlocked = new LinkedList<Integer>();
+    Queue<Integer> fileBlocked = new LinkedList<Integer>();
 
 
-    userInput userInput= new userInput();
-    userOutput userOutput= new userOutput();
-     file file= new file();
-
-     Queue<Integer> readyQueue = new LinkedList<Integer>();
-     Queue<Integer> blocked = new LinkedList<Integer>();
-     Queue<Integer> inputBlocked = new LinkedList<Integer>();
-     Queue<Integer> outputBlocked = new LinkedList<Integer>();
-     Queue<Integer> fileBlocked = new LinkedList<Integer>();
+    ArrayList<Pair> programs = new ArrayList<Pair>();
 
 
-     ArrayList<Pair> programs = new ArrayList<Pair>();
+    HashMap<Integer, ArrayList<Pair>> memory = new HashMap<Integer, ArrayList<Pair>>();
 
-
-
-     HashMap<Integer,ArrayList<Pair>> memory = new HashMap<Integer,ArrayList<Pair>>();
-
-     HashMap<Integer,Queue<String>> instructionQueue = new HashMap<Integer, Queue<String>>();
-     Scheduler scheduler = new Scheduler();
+    HashMap<Integer, Queue<String>> instructionQueue = new HashMap<Integer, Queue<String>>();
+    Scheduler scheduler = new Scheduler();
 
     boolean isRunning;
 
 
-    public void print(Object x){
+    public void print(Object x) {
         String s = (String) x;
         System.out.println(s);
     }
-    public void assign(String x, int pid){
-            Scanner myObj = new Scanner(System.in);
-            String input;
-            System.out.println("Enter value:");
-            input = myObj.nextLine();
 
-            for (int i = 0; i < memory.get(pid).size(); i++) {
-                Pair temp = memory.get(pid).get(i);
-                String var = (String) temp.x;
-                if (var.equals(x)){
-                    memory.get(pid).set(i, new Pair((String) x, (Object) input));
-                }
-            }
-
-    }
-    public void assign(String x, String value, int pid){
+    public void assign(String x, int pid) {
+        Scanner myObj = new Scanner(System.in);
+        String input;
+        System.out.println("Enter value:");
+        input = myObj.nextLine();
 
         for (int i = 0; i < memory.get(pid).size(); i++) {
             Pair temp = memory.get(pid).get(i);
-            if (temp.x.equals(x)){
+            String var = (String) temp.x;
+            if (var.equals(x)) {
+                memory.get(pid).set(i, new Pair((String) x, (Object) input));
+            }
+        }
+
+    }
+
+    public void assign(String x, String value, int pid) {
+
+        for (int i = 0; i < memory.get(pid).size(); i++) {
+            Pair temp = memory.get(pid).get(i);
+            if (temp.x.equals(x)) {
                 memory.get(pid).set(i, new Pair((String) x, value));
             }
         }
-        }
+    }
+
     public String readFile(String x) {
         try {
-            x = "src/"+x+".txt";
+            x = "src/" + x + ".txt";
             File myObj = new File(x);
             Scanner myReader = new Scanner(myObj);
             String content = "";
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
-                content =  content + data + "\n" ;
+                content = content + data + "\n";
             }
             myReader.close();
             return content;
@@ -80,70 +79,71 @@ public class Interpreter {
 
     }
 
-    public void writeFile (Object x, Object y){
-        String fileName = "src/"+ (String) x + ".txt";
+    public void writeFile(Object x, Object y) {
+        String fileName = "src/" + (String) x + ".txt";
         String data = (String) y;
 
-            try {
-                File myObj = new File(fileName);
-                if (myObj.createNewFile()) {
-                    FileWriter myWriter = new FileWriter(fileName);
-                    myWriter.write(data);
-                    myWriter.close();
-                } else {
-                    System.out.println("File already exists.");
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred.");
-                e.printStackTrace();
+        try {
+            File myObj = new File(fileName);
+            if (myObj.createNewFile()) {
+                FileWriter myWriter = new FileWriter(fileName);
+                myWriter.write(data);
+                myWriter.close();
+            } else {
+                System.out.println("File already exists.");
             }
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
 
     }
 
-    public void printFromTo(int x, int y){
-        if(x == y){
+    public void printFromTo(int x, int y) {
+        if (x == y) {
             System.out.println("The two numbers are equal!");
             return;
         }
         int min;
         int max;
-        if(x<y){
+        if (x < y) {
             min = x;
-            max = y-1;
-        }else{
+            max = y - 1;
+        } else {
             min = y;
-            max = x-1;
+            max = x - 1;
         }
         System.out.println("Our range is:");
-        while(min != max){
+        while (min != max) {
 
             System.out.println(++min);
         }
 
     }
-    public boolean semWait(resource x, int pid){
 
-        if(x.getAvailable()){
+    public boolean semWait(resource x, int pid) {
+
+        if (x.getAvailable()) {
             x.setAvailable();
             return true;
-        }
-        else{
+        } else {
             blocked.add(pid);
-            if(x.equals(userInput)){
+            if (x.equals(userInput)) {
                 inputBlocked.add(pid);
             } else if (x.equals(userOutput)) {
                 outputBlocked.add(pid);
-            }
-            else {
+            } else {
                 fileBlocked.add(pid);
             }
-            return  false;
+            return false;
         }
     }
-    public void semSignal(resource x, int pid){
+
+    public void semSignal(resource x, int pid) {
 
         x.setAvailable();
     }
+
     public int readLine(String line, int pid) throws Exception {
         isRunning = true;
         String[] Line = line.split(" ");
@@ -152,13 +152,13 @@ public class Interpreter {
         String argument2;
 
 
-        switch (function){
+        switch (function) {
             case "print":
-                argument1 ="";
+                argument1 = "";
 
-                for (int i = 0; i < memory.get(pid).size() ; i++) {
+                for (int i = 0; i < memory.get(pid).size(); i++) {
                     Pair temp = memory.get(pid).get(i);
-                    if(temp.x.equals(Line[1])){
+                    if (temp.x.equals(Line[1])) {
                         argument1 = (String) temp.y;
                     }
                 }
@@ -167,31 +167,30 @@ public class Interpreter {
 
             case "readFile":
                 argument1 = "";
-                for (int i = 0; i < memory.get(pid).size() ; i++) {
+                for (int i = 0; i < memory.get(pid).size(); i++) {
                     Pair temp = memory.get(pid).get(i);
-                    if(temp.x.equals(Line[1])){
+                    if (temp.x.equals(Line[1])) {
                         argument1 = (String) temp.y;
                     }
                 }
                 readFile(argument1);
                 break;
             case "assign":
-                if(Line.length == 3){
+                if (Line.length == 3) {
                     memory.get(pid).add(new Pair(Line[1], ""));
-                    assign(Line[1],pid);
-                }
-                else {
+                    assign(Line[1], pid);
+                } else {
                     memory.get(pid).add(new Pair(Line[1], ""));
                     String var = Line[3];
                     String fileName = "";
-                    for (int i = 0; i < memory.get(pid).size() ; i++) {
+                    for (int i = 0; i < memory.get(pid).size(); i++) {
                         Pair temp = memory.get(pid).get(i);
-                        if(temp.x.equals(var)){
+                        if (temp.x.equals(var)) {
                             fileName = (String) temp.y;
                         }
                     }
                     String output = readFile(fileName);
-                    assign(Line[1],output, pid);
+                    assign(Line[1], output, pid);
                 }
 
 
@@ -199,12 +198,12 @@ public class Interpreter {
             case "writeFile":
                 argument1 = "";
                 argument2 = "";
-                for (int i = 0; i < memory.get(pid).size() ; i++) {
+                for (int i = 0; i < memory.get(pid).size(); i++) {
                     Pair temp = memory.get(pid).get(i);
-                    if(temp.x.equals(Line[1])){
+                    if (temp.x.equals(Line[1])) {
                         argument1 = (String) temp.y;
                     }
-                    if(temp.x.equals(Line[2])){
+                    if (temp.x.equals(Line[2])) {
                         argument2 = (String) temp.y;
                     }
                 }
@@ -214,44 +213,47 @@ public class Interpreter {
                 int arg1 = 0;
                 int arg2 = 0;
 
-                for (int i = 0; i < memory.get(pid).size() ; i++) {
+                for (int i = 0; i < memory.get(pid).size(); i++) {
                     Pair temp = memory.get(pid).get(i);
-                    if(temp.x.equals(Line[1])){
+                    if (temp.x.equals(Line[1])) {
                         arg1 = Integer.parseInt((String) temp.y);
                     }
-                    if(temp.x.equals(Line[2])){
+                    if (temp.x.equals(Line[2])) {
                         arg2 = Integer.parseInt((String) temp.y);
                     }
                 }
 
 
-                printFromTo(arg1,arg2);
+                printFromTo(arg1, arg2);
                 break;
             case "semWait":
                 argument1 = Line[1];
-                switch(argument1) {
+                switch (argument1) {
 
                     case "userInput":
-                        if(! semWait(userInput, pid)){
+                        if (!semWait(userInput, pid)) {
                             return 1;
-                        };
+                        }
+                        ;
                         break;
                     case "userOutput":
 
-                        if(! semWait(userOutput, pid)){
+                        if (!semWait(userOutput, pid)) {
                             return 1;
-                        };
+                        }
+                        ;
                         break;
                     case "file":
-                        if(! semWait(file, pid)){
+                        if (!semWait(file, pid)) {
                             return 1;
-                        };
+                        }
+                        ;
                         break;
                 }
                 break;
             case "semSignal":
                 argument1 = Line[1];
-                switch(argument1) {
+                switch (argument1) {
 
                     case "userInput":
                         semSignal(userInput, pid);
@@ -264,11 +266,13 @@ public class Interpreter {
                         return 4;
                 }
                 break;
-            default: return 0;
+            default:
+                return 0;
         }
         return 0;
     }
-    public void execute(int pid){
+
+    public void execute(int pid) {
         try {
 
             String pathname = "";
@@ -286,7 +290,7 @@ public class Interpreter {
                 String data = myReader.nextLine();
                 instructionQueue.get(pid).add(data);
 //                readLine(data,pid);
-                content =  content + data + "\n" ;
+                content = content + data + "\n";
             }
 
             myReader.close();
@@ -301,24 +305,22 @@ public class Interpreter {
     public static void main(String[] args) throws Exception {
 
         Interpreter i = new Interpreter();
-        i.programs.add(new Pair(1,"src/Program_1.txt"));
-        i.programs.add(new Pair(2,"src/Program_2.txt"));
-        i.programs.add(new Pair(3,"src/Program_3.txt"));
+        i.programs.add(new Pair(1, "src/Program_1.txt"));
+        i.programs.add(new Pair(2, "src/Program_2.txt"));
+        i.programs.add(new Pair(3, "src/Program_3.txt"));
 
 
-        i.memory.put(1,new ArrayList<Pair>());
-        i.memory.put(2,new ArrayList<Pair>());
-        i.memory.put(3,new ArrayList<Pair>());
+        i.memory.put(1, new ArrayList<Pair>());
+        i.memory.put(2, new ArrayList<Pair>());
+        i.memory.put(3, new ArrayList<Pair>());
 
 
-        for (Pair p:i.programs
+        for (Pair p : i.programs
         ) {
             i.instructionQueue.put((Integer) p.x, new LinkedList<String>());
             i.execute((Integer) p.x);
         }
         i.scheduler.scheduler(i);
-
-
 
 
     }

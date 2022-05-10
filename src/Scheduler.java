@@ -15,23 +15,8 @@ public class Scheduler {
 
     }
 
-    public int getCounter() {
-        return counter;
-    }
-
-    public void setCounter(int counter) {
-        this.counter = counter;
-    }
-
-    public void setTime(int time) {
-        this.time = time;
-    }
-
-    public int getTime() {
-        return time;
-    }
-    public void run ( Interpreter interpreter) throws Exception {
-        System.out.println("------ @Time: "+time+", process No."+currentProgram+"    "+interpreter.instructionQueue.get(currentProgram).element()+" ------");
+    public void run(Interpreter interpreter) throws Exception {
+        System.out.println("------ @Time: " + time + ", process No." + currentProgram + "    " + interpreter.instructionQueue.get(currentProgram).element() + " ------");
         int state = interpreter.readLine(interpreter.instructionQueue.get(currentProgram).element(), currentProgram);
         counter++;
         int unblocked = 0;
@@ -70,7 +55,7 @@ public class Scheduler {
                     }
                 }
             }
-            }  else {
+        } else {
             //the current program got blocked, so we get another one from the readyQueue
             if (!interpreter.readyQueue.isEmpty()) {
                 currentProgram = interpreter.readyQueue.poll();
@@ -82,22 +67,18 @@ public class Scheduler {
     public void scheduler(Interpreter interpreter) throws Exception {
         programs = interpreter.programs;
         while (true) {
-//            for (int pid : interpreter.readyQueue) {
-//                System.out.print("The Ready Programs are: "+ pid);
-//            }
 
             time++;
-            if(time >= 25){
+            if (time >= 25) {
                 break;
             }
             if (time == 0) {
-                interpreter.readyQueue.add((int)programs.get(0).x);
+                interpreter.readyQueue.add((int) programs.get(0).x);
             } else if (time == 1) {
-                interpreter.readyQueue.add((int)programs.get(1).x);
+                interpreter.readyQueue.add((int) programs.get(1).x);
 
-            }
-            else if (time == 4) {
-                interpreter.readyQueue.add((int)programs.get(2).x);
+            } else if (time == 4) {
+                interpreter.readyQueue.add((int) programs.get(2).x);
             }
 
 
@@ -122,51 +103,49 @@ public class Scheduler {
             }
 
 
-            if(currentProgram!=0){
-                if (counter ==2 ){
-                    if (!interpreter.instructionQueue.get(currentProgram).isEmpty()){
+            if (currentProgram != 0) {
+                if (counter == 2) {
+                    if (!interpreter.instructionQueue.get(currentProgram).isEmpty()) {
                         interpreter.readyQueue.add(currentProgram);
                     }
-                    if (interpreter.readyQueue.isEmpty()){
-                        if (interpreter.blocked.isEmpty()){
+                    if (interpreter.readyQueue.isEmpty()) {
+                        if (interpreter.blocked.isEmpty()) {
                             break;
-                        }
-                        else {
+                        } else {
                             currentProgram = interpreter.blocked.poll();
                             counter = 0;
                             run(interpreter);
                         }
-                    }else {
-                        currentProgram=interpreter.readyQueue.poll();
+                    } else {
+                        currentProgram = interpreter.readyQueue.poll();
                         counter = 0;
                         run(interpreter);
                     }
-                }
-                else {
-                    if (interpreter.instructionQueue.get(currentProgram).isEmpty()){
-                        if (!interpreter.readyQueue.isEmpty()){
-                            currentProgram=interpreter.readyQueue.poll();
-                            counter=0;
+                } else {
+                    if (interpreter.instructionQueue.get(currentProgram).isEmpty()) {
+                        if (!interpreter.readyQueue.isEmpty()) {
+                            currentProgram = interpreter.readyQueue.poll();
+                            counter = 0;
                             run(interpreter);
-                        }else {
-                            if (!interpreter.blocked.isEmpty()){
-                               currentProgram=interpreter.blocked.poll();
-                                counter=0;
+                        } else {
+                            if (!interpreter.blocked.isEmpty()) {
+                                currentProgram = interpreter.blocked.poll();
+                                counter = 0;
                                 run(interpreter);
                             } else {
                                 break;
                             }
                         }
 
-                    }else {
+                    } else {
                         run(interpreter);
                     }
                 }
             }
 
-            }
-
         }
+
     }
+}
 
 
