@@ -61,12 +61,12 @@ public class Interpreter {
         }
     public String readFile(String x) {
         try {
+            x = "src/"+x+".txt";
             File myObj = new File(x);
             Scanner myReader = new Scanner(myObj);
             String content = "";
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
-                System.out.println(data);
                 content =  content + data + "\n" ;
             }
             myReader.close();
@@ -87,11 +87,9 @@ public class Interpreter {
             try {
                 File myObj = new File(fileName);
                 if (myObj.createNewFile()) {
-                    System.out.println("File created: " + myObj.getName());
                     FileWriter myWriter = new FileWriter(fileName);
                     myWriter.write(data);
                     myWriter.close();
-                    System.out.println("Successfully wrote to the file.");
                 } else {
                     System.out.println("File already exists.");
                 }
@@ -153,13 +151,12 @@ public class Interpreter {
         String argument1;
         String argument2;
 
-        System.out.println(" "+function);
+
         switch (function){
             case "print":
                 argument1 ="";
 
                 for (int i = 0; i < memory.get(pid).size() ; i++) {
-
                     Pair temp = memory.get(pid).get(i);
                     if(temp.x.equals(Line[1])){
                         argument1 = (String) temp.y;
@@ -186,7 +183,14 @@ public class Interpreter {
                 else {
                     memory.get(pid).add(new Pair(Line[1], ""));
                     String var = Line[3];
-                    String output = readFile(var);
+                    String fileName = "";
+                    for (int i = 0; i < memory.get(pid).size() ; i++) {
+                        Pair temp = memory.get(pid).get(i);
+                        if(temp.x.equals(var)){
+                            fileName = (String) temp.y;
+                        }
+                    }
+                    String output = readFile(fileName);
                     assign(Line[1],output, pid);
                 }
 
@@ -314,9 +318,6 @@ public class Interpreter {
         }
         i.scheduler.scheduler(i);
 
-
-//        System.out.println(i.programs.size() + " , "+ i.memory.size());
-//        System.out.println(i.instructionQueue.size());
 
 
 

@@ -31,24 +31,18 @@ public class Scheduler {
         return time;
     }
     public void run ( Interpreter interpreter) throws Exception {
-
+        System.out.println("------ @Time: "+time+", process No."+currentProgram+"    "+interpreter.instructionQueue.get(currentProgram).element()+" ------");
         int state = interpreter.readLine(interpreter.instructionQueue.get(currentProgram).element(), currentProgram);
         counter++;
         int unblocked = 0;
-        int oldID = currentProgram;
+
         if (state != 1) {
 
             interpreter.instructionQueue.get(currentProgram).remove();
             if (state == 2) {
                 if (!interpreter.inputBlocked.isEmpty()) {
                     unblocked = interpreter.inputBlocked.poll();
-                    System.out.println("this is the unblocked: "+unblocked);
                     interpreter.readyQueue.add(unblocked);
-                    if(! interpreter.instructionQueue.get(oldID).isEmpty()){
-                        interpreter.readyQueue.add(oldID);
-                    }
-                    currentProgram = interpreter.readyQueue.poll();
-                    counter = 0;
                 }
                 for (int pid : interpreter.blocked) {
                     if (pid == unblocked) {
@@ -59,11 +53,6 @@ public class Scheduler {
                 if (!interpreter.outputBlocked.isEmpty()) {
                     unblocked = interpreter.outputBlocked.poll();
                     interpreter.readyQueue.add(unblocked);
-                    if(! interpreter.instructionQueue.get(oldID).isEmpty()){
-                        interpreter.readyQueue.add(oldID);
-                    }
-                    currentProgram = interpreter.readyQueue.poll();
-                    counter = 0;
                 }
                 for (int pid : interpreter.blocked) {
                     if (pid == unblocked) {
@@ -74,11 +63,6 @@ public class Scheduler {
                 if (!interpreter.fileBlocked.isEmpty()) {
                     unblocked = interpreter.fileBlocked.poll();
                     interpreter.readyQueue.add(unblocked);
-                    if(! interpreter.instructionQueue.get(oldID).isEmpty()){
-                        interpreter.readyQueue.add(oldID);
-                    }
-                    currentProgram = interpreter.readyQueue.poll();
-                    counter = 0;
                 }
                 for (int pid : interpreter.blocked) {
                     if (pid == unblocked) {
@@ -87,8 +71,8 @@ public class Scheduler {
                 }
             }
             }  else {
+            //the current program got blocked, so we get another one from the readyQueue
             if (!interpreter.readyQueue.isEmpty()) {
-                System.out.println("HEYY IAM N");
                 currentProgram = interpreter.readyQueue.poll();
                 counter = 0;
             }
@@ -106,28 +90,21 @@ public class Scheduler {
             if(time >= 25){
                 break;
             }
-            System.out.println("Current program: "+ currentProgram + " Time: "+ time);
             if (time == 0) {
-                System.out.println("p1 entered");
                 interpreter.readyQueue.add((int)programs.get(0).x);
             } else if (time == 1) {
-                System.out.println("p2 entered");
                 interpreter.readyQueue.add((int)programs.get(1).x);
 
             }
             else if (time == 4) {
-                System.out.println("p3 entered");
                 interpreter.readyQueue.add((int)programs.get(2).x);
             }
 
 
             boolean finished = false;
             if (currentProgram == 0) {
-                System.out.println("1");
                 if (interpreter.readyQueue.isEmpty()) {
-                    System.out.println("2");
                     if (interpreter.blocked.isEmpty()) {
-                        System.out.println("3");
                         break;
                     } else {
                         currentProgram = interpreter.blocked.poll();
@@ -169,10 +146,12 @@ public class Scheduler {
                     if (interpreter.instructionQueue.get(currentProgram).isEmpty()){
                         if (!interpreter.readyQueue.isEmpty()){
                             currentProgram=interpreter.readyQueue.poll();
+                            counter=0;
                             run(interpreter);
                         }else {
                             if (!interpreter.blocked.isEmpty()){
                                currentProgram=interpreter.blocked.poll();
+                                counter=0;
                                 run(interpreter);
                             } else {
                                 break;
