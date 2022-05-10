@@ -1,6 +1,6 @@
-import java.io.*;  // Import the File class
+import java.io.*;
 import java.util.*;
-import java.nio.file.*;
+
 
 
 public class Interpreter {
@@ -27,13 +27,14 @@ public class Interpreter {
 
      HashMap<Integer,Queue<String>> instructionQueue = new HashMap<Integer, Queue<String>>();
 
+    boolean isRunning;
+
 
     public void print(Object x){
         String s = (String) x;
         System.out.println(s);
     }
     public void assign(String x, int pid){
-//            if(inputBlocked.)
             Scanner myObj = new Scanner(System.in);
             String input;
             System.out.println("Enter value:");
@@ -143,7 +144,8 @@ public class Interpreter {
 
         x.setAvailable();
     }
-    public void readLine(String line, int pid) throws Exception {
+    public boolean readLine(String line, int pid) throws Exception {
+        isRunning = true;
         String[] Line = line.split(" ");
         String function = Line[0];
         String argument1;
@@ -224,14 +226,11 @@ public class Interpreter {
                 switch(argument1) {
 
                     case "userInput":
-                        semWait(userInput, pid);
-                        break;
+                        return semWait(userInput, pid);
                     case "userOutput":
-                        semWait(userOutput, pid);
-                        break;
+                        return semWait(userOutput, pid);
                     case "file":
-                        semWait(file, pid);
-                        break;
+                        return semWait(file, pid);
                 }
                 break;
             case "semSignal":
@@ -249,8 +248,9 @@ public class Interpreter {
                         break;
                 }
                 break;
-
+            default: return true;
         }
+        return true;
     }
     public void execute(int pid){
         try {
