@@ -69,9 +69,7 @@ public class Scheduler {
         while (true) {
 
             time++;
-            if (time >= 25) {
-                break;
-            }
+
             if (time == 0) {
                 interpreter.readyQueue.add((int) programs.get(0).x);
             } else if (time == 1) {

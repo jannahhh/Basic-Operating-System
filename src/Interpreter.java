@@ -23,8 +23,7 @@ public class Interpreter {
 
     HashMap<Integer, Queue<String>> instructionQueue = new HashMap<Integer, Queue<String>>();
     Scheduler scheduler = new Scheduler();
-
-    boolean isRunning;
+    ArrayList<Pair> temporaryInputs = new ArrayList<Pair>();
 
 
     public void print(Object x) {
@@ -145,7 +144,6 @@ public class Interpreter {
     }
 
     public int readLine(String line, int pid) throws Exception {
-        isRunning = true;
         String[] Line = line.split(" ");
         String function = Line[0];
         String argument1;
@@ -153,6 +151,18 @@ public class Interpreter {
 
 
         switch (function) {
+            case "input":
+                Scanner myObj = new Scanner(System.in);
+                String input ;
+                System.out.println("Enter value:");
+                input = myObj.nextLine();
+                for (Pair p : temporaryInputs) {
+                    if (pid == (int)p.x){
+                        p.y = input;
+                    }
+                }
+                break;
+
             case "print":
                 argument1 = "";
 
@@ -166,33 +176,44 @@ public class Interpreter {
                 break;
 
             case "readFile":
-                argument1 = "";
+                String tmp = "";
+                String output;
                 for (int i = 0; i < memory.get(pid).size(); i++) {
                     Pair temp = memory.get(pid).get(i);
                     if (temp.x.equals(Line[1])) {
-                        argument1 = (String) temp.y;
+                        tmp = (String) temp.y;
                     }
                 }
-                readFile(argument1);
+                output = readFile(tmp);
+                for (Pair p : temporaryInputs) {
+                    if (pid == (int)p.x){
+                        p.y = output;
+                    }
+                }
                 break;
             case "assign":
-                if (Line.length == 3) {
-                    memory.get(pid).add(new Pair(Line[1], ""));
-                    assign(Line[1], pid);
-                } else {
-                    memory.get(pid).add(new Pair(Line[1], ""));
-                    String var = Line[3];
-                    String fileName = "";
-                    for (int i = 0; i < memory.get(pid).size(); i++) {
-                        Pair temp = memory.get(pid).get(i);
-                        if (temp.x.equals(var)) {
-                            fileName = (String) temp.y;
-                        }
+//                if (Line.length == 3) {
+//                    memory.get(pid).add(new Pair(Line[1], ""));
+//                    assign(Line[1], pid);
+//                } else {
+//                    memory.get(pid).add(new Pair(Line[1], ""));
+//                    String var = Line[3];
+//                    String fileName = "";
+//                    for (int i = 0; i < memory.get(pid).size(); i++) {
+//                        Pair temp = memory.get(pid).get(i);
+//                        if (temp.x.equals(var)) {
+//                            fileName = (String) temp.y;
+//                        }
+//                    }
+//                    String output = readFile(fileName);
+//                    assign(Line[1], output, pid);
+//                }
+                memory.get(pid).add(new Pair(Line[1], ""));
+                for (Pair p : temporaryInputs) {
+                    if (pid == (int)p.x){
+                        assign(Line[1], (String) p.y, pid);
                     }
-                    String output = readFile(fileName);
-                    assign(Line[1], output, pid);
                 }
-
 
                 break;
             case "writeFile":
@@ -288,7 +309,20 @@ public class Interpreter {
             String content = "";
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
-                instructionQueue.get(pid).add(data);
+                if (data.contains("assign")){
+                    if (data.contains("readFile")){
+                        String[] Line = data.split(" ");
+                        instructionQueue.get(pid).add("readFile "+Line[3]);
+                        instructionQueue.get(pid).add(Line[0] +" "+ Line[1]);
+
+                    }else{
+                    String[] Line = data.split(" ");
+                    instructionQueue.get(pid).add("input");
+                    instructionQueue.get(pid).add(Line[0] +" "+ Line[1]);
+                    }
+                }else {
+                    instructionQueue.get(pid).add(data);
+                }
 //                readLine(data,pid);
                 content = content + data + "\n";
             }
@@ -310,17 +344,15 @@ public class Interpreter {
         i.programs.add(new Pair(3, "src/Program_3.txt"));
 
 
-        i.memory.put(1, new ArrayList<Pair>());
-        i.memory.put(2, new ArrayList<Pair>());
-        i.memory.put(3, new ArrayList<Pair>());
 
-
-        for (Pair p : i.programs
-        ) {
+        for (Pair p: i.programs) {
+            i.memory.put((int)p.x, new ArrayList<Pair>());
+            i.temporaryInputs.add(new Pair((int)p.x, ""));
             i.instructionQueue.put((Integer) p.x, new LinkedList<String>());
             i.execute((Integer) p.x);
         }
         i.scheduler.scheduler(i);
+
 
 
     }
