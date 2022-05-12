@@ -4,55 +4,52 @@ import java.util.*;
 
 public class Interpreter {
 
-
+//  Critical Resources
     userInput userInput = new userInput();
     userOutput userOutput = new userOutput();
     file file = new file();
+//-------------------------
 
-    Queue<Integer> readyQueue = new LinkedList<Integer>();
-    Queue<Integer> blocked = new LinkedList<Integer>();
-    Queue<Integer> inputBlocked = new LinkedList<Integer>();
-    Queue<Integer> outputBlocked = new LinkedList<Integer>();
-    Queue<Integer> fileBlocked = new LinkedList<Integer>();
+//    Ready and Blocked Queues
+    Queue<Integer> readyQueue = new LinkedList<>();
+    Queue<Integer> blocked = new LinkedList<>();
+    Queue<Integer> inputBlocked = new LinkedList<>();
+    Queue<Integer> outputBlocked = new LinkedList<>();
+    Queue<Integer> fileBlocked = new LinkedList<>();
+//  -----------------------------------------------------
 
 
-    ArrayList<Pair> programs = new ArrayList<Pair>();
 
+    HashMap<Integer, ArrayList<Pair>> memory = new HashMap<>();
 
-    HashMap<Integer, ArrayList<Pair>> memory = new HashMap<Integer, ArrayList<Pair>>();
+    HashMap<Integer, Queue<String>> instructionQueue = new HashMap<>();
 
-    HashMap<Integer, Queue<String>> instructionQueue = new HashMap<Integer, Queue<String>>();
-    Scheduler scheduler = new Scheduler();
-    ArrayList<Pair> temporaryInputs = new ArrayList<Pair>();
+    ArrayList<Pair> temporaryInputs = new ArrayList<>();
 
+    ArrayList<Pair> programs;
+
+    public Interpreter(ArrayList<Pair> programs){
+        this.programs = programs;
+        for (Pair p: programs) {
+            memory.put((int)p.x, new ArrayList<>());
+            temporaryInputs.add(new Pair(p.x, ""));
+            instructionQueue.put((Integer) p.x, new LinkedList<>());
+            execute((Integer) p.x);
+        }
+    }
 
     public void print(Object x) {
         String s = (String) x;
         System.out.println(s);
     }
 
-    public void assign(String x, int pid) {
-        Scanner myObj = new Scanner(System.in);
-        String input;
-        System.out.println("Enter value:");
-        input = myObj.nextLine();
-
-        for (int i = 0; i < memory.get(pid).size(); i++) {
-            Pair temp = memory.get(pid).get(i);
-            String var = (String) temp.x;
-            if (var.equals(x)) {
-                memory.get(pid).set(i, new Pair((String) x, (Object) input));
-            }
-        }
-
-    }
 
     public void assign(String x, String value, int pid) {
 
         for (int i = 0; i < memory.get(pid).size(); i++) {
             Pair temp = memory.get(pid).get(i);
             if (temp.x.equals(x)) {
-                memory.get(pid).set(i, new Pair((String) x, value));
+                memory.get(pid).set(i, new Pair(x, value));
             }
         }
     }
@@ -138,7 +135,7 @@ public class Interpreter {
         }
     }
 
-    public void semSignal(resource x, int pid) {
+    public void semSignal(resource x) {
 
         x.setAvailable();
     }
@@ -192,22 +189,6 @@ public class Interpreter {
                 }
                 break;
             case "assign":
-//                if (Line.length == 3) {
-//                    memory.get(pid).add(new Pair(Line[1], ""));
-//                    assign(Line[1], pid);
-//                } else {
-//                    memory.get(pid).add(new Pair(Line[1], ""));
-//                    String var = Line[3];
-//                    String fileName = "";
-//                    for (int i = 0; i < memory.get(pid).size(); i++) {
-//                        Pair temp = memory.get(pid).get(i);
-//                        if (temp.x.equals(var)) {
-//                            fileName = (String) temp.y;
-//                        }
-//                    }
-//                    String output = readFile(fileName);
-//                    assign(Line[1], output, pid);
-//                }
                 memory.get(pid).add(new Pair(Line[1], ""));
                 for (Pair p : temporaryInputs) {
                     if (pid == (int)p.x){
@@ -255,20 +236,17 @@ public class Interpreter {
                         if (!semWait(userInput, pid)) {
                             return 1;
                         }
-                        ;
                         break;
                     case "userOutput":
 
                         if (!semWait(userOutput, pid)) {
                             return 1;
                         }
-                        ;
                         break;
                     case "file":
                         if (!semWait(file, pid)) {
                             return 1;
                         }
-                        ;
                         break;
                 }
                 break;
@@ -277,13 +255,13 @@ public class Interpreter {
                 switch (argument1) {
 
                     case "userInput":
-                        semSignal(userInput, pid);
+                        semSignal(userInput);
                         return 2;
                     case "userOutput":
-                        semSignal(userOutput, pid);
+                        semSignal(userOutput);
                         return 3;
                     case "file":
-                        semSignal(file, pid);
+                        semSignal(file);
                         return 4;
                 }
                 break;
@@ -306,25 +284,20 @@ public class Interpreter {
 
             File myObj = new File(pathname);
             Scanner myReader = new Scanner(myObj);
-            String content = "";
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
                 if (data.contains("assign")){
+                    String[] Line = data.split(" ");
                     if (data.contains("readFile")){
-                        String[] Line = data.split(" ");
                         instructionQueue.get(pid).add("readFile "+Line[3]);
-                        instructionQueue.get(pid).add(Line[0] +" "+ Line[1]);
 
                     }else{
-                    String[] Line = data.split(" ");
-                    instructionQueue.get(pid).add("input");
-                    instructionQueue.get(pid).add(Line[0] +" "+ Line[1]);
+                        instructionQueue.get(pid).add("input");
                     }
+                    instructionQueue.get(pid).add(Line[0] +" "+ Line[1]);
                 }else {
                     instructionQueue.get(pid).add(data);
                 }
-//                readLine(data,pid);
-                content = content + data + "\n";
             }
 
             myReader.close();
@@ -334,26 +307,5 @@ public class Interpreter {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        Interpreter i = new Interpreter();
-        i.programs.add(new Pair(1, "src/Program_1.txt"));
-        i.programs.add(new Pair(2, "src/Program_2.txt"));
-        i.programs.add(new Pair(3, "src/Program_3.txt"));
-
-
-
-        for (Pair p: i.programs) {
-            i.memory.put((int)p.x, new ArrayList<Pair>());
-            i.temporaryInputs.add(new Pair((int)p.x, ""));
-            i.instructionQueue.put((Integer) p.x, new LinkedList<String>());
-            i.execute((Integer) p.x);
-        }
-        i.scheduler.scheduler(i);
-
-
-
     }
 }

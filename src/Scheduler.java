@@ -1,13 +1,13 @@
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
+
 
 public class Scheduler {
 
     int time = -1;
     int counter;
+    int timeSlice = 2;
 
-    ArrayList<Pair> programs = new ArrayList<Pair>();
+    ArrayList<Pair> programs = new ArrayList<>();
 
     static int currentProgram = 0;
 
@@ -31,7 +31,7 @@ public class Scheduler {
                 }
                 for (int pid : interpreter.blocked) {
                     if (pid == unblocked) {
-                        interpreter.blocked.remove((int) pid);
+                        interpreter.blocked.remove(pid);
                     }
                 }
             } else if (state == 3) {
@@ -41,7 +41,7 @@ public class Scheduler {
                 }
                 for (int pid : interpreter.blocked) {
                     if (pid == unblocked) {
-                        interpreter.blocked.remove((int) pid);
+                        interpreter.blocked.remove(pid);
                     }
                 }
             } else if (state == 4) {
@@ -51,7 +51,7 @@ public class Scheduler {
                 }
                 for (int pid : interpreter.blocked) {
                     if (pid == unblocked) {
-                        interpreter.blocked.remove((int) pid);
+                        interpreter.blocked.remove(pid);
                     }
                 }
             }
@@ -62,6 +62,8 @@ public class Scheduler {
                 counter = 0;
             }
         }
+        System.out.println("       Ready Queue: "+ interpreter.readyQueue+"    Blocked Queue: "+interpreter.blocked);
+        System.out.println();
     }
 
     public void scheduler(Interpreter interpreter) throws Exception {
@@ -80,7 +82,6 @@ public class Scheduler {
             }
 
 
-            boolean finished = false;
             if (currentProgram == 0) {
                 if (interpreter.readyQueue.isEmpty()) {
                     if (interpreter.blocked.isEmpty()) {
@@ -102,9 +103,11 @@ public class Scheduler {
 
 
             if (currentProgram != 0) {
-                if (counter == 2) {
+                if (counter == timeSlice) {
                     if (!interpreter.instructionQueue.get(currentProgram).isEmpty()) {
                         interpreter.readyQueue.add(currentProgram);
+                    }else {
+                        System.out.println("Program No."+currentProgram+" has finished");
                     }
                     if (interpreter.readyQueue.isEmpty()) {
                         if (interpreter.blocked.isEmpty()) {
@@ -121,6 +124,7 @@ public class Scheduler {
                     }
                 } else {
                     if (interpreter.instructionQueue.get(currentProgram).isEmpty()) {
+                        System.out.println("Program No."+currentProgram+" has finished");
                         if (!interpreter.readyQueue.isEmpty()) {
                             currentProgram = interpreter.readyQueue.poll();
                             counter = 0;
