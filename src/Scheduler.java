@@ -1,18 +1,21 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class Scheduler {
 
     int time = -1;
     int counter;
-    int timeSlice = 2;
+    int timeSlice;
 
     ArrayList<Pair> programs = new ArrayList<>();
 
     static int currentProgram = 0;
+    HashMap<Integer,Integer> arrivalTime;
 
-    public Scheduler() {
-
+    public Scheduler(int timeSlice, HashMap<Integer,Integer> arrivalTime) {
+        this.timeSlice = timeSlice;
+        this.arrivalTime = arrivalTime;
     }
 
     public void run(Interpreter interpreter) throws Exception {
@@ -73,11 +76,11 @@ public class Scheduler {
 
             time++;
 
-            if (time == 0) {
+            if (time == arrivalTime.get(1)) {
                 interpreter.readyQueue.add((int) programs.get(0).x);
-            } else if (time == 1) {
+            } else if (time == arrivalTime.get(2)) {
                 interpreter.readyQueue.add((int) programs.get(1).x);
-            } else if (time == 4) {
+            } else if (time == arrivalTime.get(3)) {
                 interpreter.readyQueue.add((int) programs.get(2).x);
             }
 
