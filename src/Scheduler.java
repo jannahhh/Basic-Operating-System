@@ -17,6 +17,8 @@ public class Scheduler {
 
     public void run(Interpreter interpreter) throws Exception {
         System.out.println("------ @Time: " + time + ", process No." + currentProgram + "    " + interpreter.instructionQueue.get(currentProgram).element() + " ------");
+        System.out.println("       Ready Queue: "+ interpreter.readyQueue+"    Blocked Queue: "+interpreter.blocked);
+        System.out.println();
         int state = interpreter.readLine(interpreter.instructionQueue.get(currentProgram).element(), currentProgram);
         counter++;
         int unblocked = 0;
@@ -62,8 +64,7 @@ public class Scheduler {
                 counter = 0;
             }
         }
-        System.out.println("       Ready Queue: "+ interpreter.readyQueue+"    Blocked Queue: "+interpreter.blocked);
-        System.out.println();
+
     }
 
     public void scheduler(Interpreter interpreter) throws Exception {
@@ -76,7 +77,6 @@ public class Scheduler {
                 interpreter.readyQueue.add((int) programs.get(0).x);
             } else if (time == 1) {
                 interpreter.readyQueue.add((int) programs.get(1).x);
-
             } else if (time == 4) {
                 interpreter.readyQueue.add((int) programs.get(2).x);
             }
@@ -108,6 +108,7 @@ public class Scheduler {
                         interpreter.readyQueue.add(currentProgram);
                     }else {
                         System.out.println("Program No."+currentProgram+" has finished");
+                        System.out.println();
                     }
                     if (interpreter.readyQueue.isEmpty()) {
                         if (interpreter.blocked.isEmpty()) {
@@ -125,6 +126,7 @@ public class Scheduler {
                 } else {
                     if (interpreter.instructionQueue.get(currentProgram).isEmpty()) {
                         System.out.println("Program No."+currentProgram+" has finished");
+                        System.out.println();
                         if (!interpreter.readyQueue.isEmpty()) {
                             currentProgram = interpreter.readyQueue.poll();
                             counter = 0;
