@@ -11,11 +11,11 @@ public class userMode {
 
     public static void main(String[] args) throws Exception {
         HashMap<Integer,Integer> arrivalTime = new HashMap<Integer, Integer>();
-        arrivalTime.put(1,0);
-        arrivalTime.put(2,1);
-        arrivalTime.put(3,4);
+        arrivalTime.put(1,4);
+        arrivalTime.put(2,0);
+        arrivalTime.put(3,6);
 
-        int timeSlice = 2;
+        int timeSlice = 5;
 
         userMode userMode = new userMode(timeSlice, arrivalTime);
 

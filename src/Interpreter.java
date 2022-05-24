@@ -17,10 +17,12 @@ public class Interpreter {
     Queue<Integer> outputBlocked = new LinkedList<>();
     Queue<Integer> fileBlocked = new LinkedList<>();
 //  -----------------------------------------------------
+    int start = 0;
+    HashMap<Integer,Pair> Boundaries = new HashMap<>();
 
 
-
-    HashMap<Integer, ArrayList<Pair>> memory = new HashMap<>();
+//    HashMap<Integer, ArrayList<Pair>> memory = new HashMap<>();
+    Object [] memory = new Object[40];
 
     HashMap<Integer, Queue<String>> instructionQueue = new HashMap<>();
 
@@ -31,8 +33,6 @@ public class Interpreter {
     public Interpreter(ArrayList<Pair> programs){
         this.programs = programs;
         for (Pair p: programs) {
-            memory.put((int)p.x, new ArrayList<>());
-            temporaryInputs.add(new Pair(p.x, ""));
             instructionQueue.put((Integer) p.x, new LinkedList<>());
             execute((Integer) p.x);
         }
@@ -46,13 +46,15 @@ public class Interpreter {
 
     public void assign(String x, String value, int pid) {
 
-        for (int i = 0; i < memory.get(pid).size(); i++) {
-            Pair temp = memory.get(pid).get(i);
-            if (temp.x.equals(x)) {
-                memory.get(pid).set(i, new Pair(x, value));
+        for (int i = (int) Boundaries.get(pid).x; i < (int) Boundaries.get(pid).y; i++) {
+            if (memory[i] instanceof Pair temp){
+                if (temp.x.equals(x)){
+                    temp.y = value;
+                }
             }
         }
     }
+
 
     public String readFile(String x) {
         try {
@@ -163,10 +165,11 @@ public class Interpreter {
             case "print":
                 argument1 = "";
 
-                for (int i = 0; i < memory.get(pid).size(); i++) {
-                    Pair temp = memory.get(pid).get(i);
-                    if (temp.x.equals(Line[1])) {
-                        argument1 = (String) temp.y;
+                for (int i = (int) Boundaries.get(pid).x; i < (int) Boundaries.get(pid).y; i++) {
+                    if (memory[i] instanceof Pair temp){
+                        if (temp.x.equals(Line[1])) {
+                            argument1 = (String) temp.y;
+                        }
                     }
                 }
                 print(argument1);
@@ -175,10 +178,11 @@ public class Interpreter {
             case "readFile":
                 String tmp = "";
                 String output;
-                for (int i = 0; i < memory.get(pid).size(); i++) {
-                    Pair temp = memory.get(pid).get(i);
-                    if (temp.x.equals(Line[1])) {
-                        tmp = (String) temp.y;
+                for (int i = (int) Boundaries.get(pid).x; i < (int) Boundaries.get(pid).y; i++) {
+                    if (memory[i] instanceof Pair temp){
+                        if (temp.x.equals(Line[1])) {
+                            tmp = (String) temp.y;
+                        }
                     }
                 }
                 output = readFile(tmp);
@@ -189,7 +193,11 @@ public class Interpreter {
                 }
                 break;
             case "assign":
-                memory.get(pid).add(new Pair(Line[1], ""));
+                for (int i = (int) Boundaries.get(pid).x; i <(int) Boundaries.get(pid).y; i++) {
+                    if (memory[i] == null){
+                        memory[i] = new Pair(Line[1], "");
+                    }
+                }
                 for (Pair p : temporaryInputs) {
                     if (pid == (int)p.x){
                         assign(Line[1], (String) p.y, pid);
@@ -200,13 +208,14 @@ public class Interpreter {
             case "writeFile":
                 argument1 = "";
                 argument2 = "";
-                for (int i = 0; i < memory.get(pid).size(); i++) {
-                    Pair temp = memory.get(pid).get(i);
-                    if (temp.x.equals(Line[1])) {
-                        argument1 = (String) temp.y;
-                    }
-                    if (temp.x.equals(Line[2])) {
-                        argument2 = (String) temp.y;
+                for (int i = (int) Boundaries.get(pid).x; i < (int) Boundaries.get(pid).y; i++) {
+                    if (memory[i] instanceof Pair temp){
+                        if (temp.x.equals(Line[1])) {
+                            argument1 = (String) temp.y;
+                        }
+                        if (temp.x.equals(Line[2])) {
+                            argument2 = (String) temp.y;
+                        }
                     }
                 }
                 writeFile(argument1, argument2);
@@ -215,13 +224,14 @@ public class Interpreter {
                 int arg1 = 0;
                 int arg2 = 0;
 
-                for (int i = 0; i < memory.get(pid).size(); i++) {
-                    Pair temp = memory.get(pid).get(i);
-                    if (temp.x.equals(Line[1])) {
-                        arg1 = Integer.parseInt((String) temp.y);
-                    }
-                    if (temp.x.equals(Line[2])) {
-                        arg2 = Integer.parseInt((String) temp.y);
+                for (int i = (int) Boundaries.get(pid).x; i < (int) Boundaries.get(pid).y; i++) {
+                    if (memory[i] instanceof Pair temp){
+                        if (temp.x.equals(Line[1])) {
+                            arg1 = Integer.parseInt((String) temp.y);
+                        }
+                        if (temp.x.equals(Line[2])) {
+                            arg2 = Integer.parseInt((String) temp.y);
+                        }
                     }
                 }
 
@@ -274,6 +284,8 @@ public class Interpreter {
     public void execute(int pid) {
         try {
 
+            temporaryInputs.add(new Pair(pid, ""));
+
             String pathname = "";
             for (Pair temp : programs) {
                 if ((Integer) temp.x == pid) {
@@ -299,6 +311,20 @@ public class Interpreter {
                     instructionQueue.get(pid).add(data);
                 }
             }
+            int noOfInstructions = instructionQueue.get(pid).size();
+            String state = "Created";
+            int pc = noOfInstructions - instructionQueue.get(pid).size();
+            int sizeInMemory = 7 + noOfInstructions;
+            int end = start + sizeInMemory -1;
+            Pair boundaries = new Pair(start, end );
+            start += sizeInMemory;
+            memory[start] = pid;
+            memory[start+1] = state;
+            memory[start+2] = pc;
+            memory[start+3] = boundaries;
+            memory[start+4] = instructionQueue.get(pid);
+            Boundaries.put(pid, new Pair(start,end));
+
 
             myReader.close();
         } catch (FileNotFoundException e) {
