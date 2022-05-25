@@ -1,0 +1,14 @@
+1
+Created
+0
+( 0, 16 )
+semWait userInput
+input
+assign a
+input
+assign c
+semSignal userInput
+semWait userOutput
+printFromTo a c
+printFromTo a c
+semSignal userOutput

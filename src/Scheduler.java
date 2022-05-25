@@ -19,10 +19,13 @@ public class Scheduler {
     }
 
     public void run(Interpreter interpreter) throws Exception {
+        interpreter.runState(currentProgram);
         System.out.println("------ @Time: " + time + ", process No." + currentProgram + "    " + interpreter.instructionQueue.get(currentProgram).element() + " ------");
         System.out.println("       Ready Queue: "+ interpreter.readyQueue+"    Blocked Queue: "+interpreter.blocked);
+        interpreter.displayMemory();
         System.out.println();
         int state = interpreter.readLine(interpreter.instructionQueue.get(currentProgram).element(), currentProgram);
+        interpreter.changeState();
         counter++;
         int unblocked = 0;
 
@@ -33,6 +36,7 @@ public class Scheduler {
                 if (!interpreter.inputBlocked.isEmpty()) {
                     unblocked = interpreter.inputBlocked.poll();
                     interpreter.readyQueue.add(unblocked);
+                    interpreter.changeState();
                 }
                 for (int pid : interpreter.blocked) {
                     if (pid == unblocked) {
@@ -43,6 +47,7 @@ public class Scheduler {
                 if (!interpreter.outputBlocked.isEmpty()) {
                     unblocked = interpreter.outputBlocked.poll();
                     interpreter.readyQueue.add(unblocked);
+                    interpreter.changeState();
                 }
                 for (int pid : interpreter.blocked) {
                     if (pid == unblocked) {
@@ -53,6 +58,7 @@ public class Scheduler {
                 if (!interpreter.fileBlocked.isEmpty()) {
                     unblocked = interpreter.fileBlocked.poll();
                     interpreter.readyQueue.add(unblocked);
+                    interpreter.changeState();
                 }
                 for (int pid : interpreter.blocked) {
                     if (pid == unblocked) {
@@ -64,6 +70,7 @@ public class Scheduler {
             //the current program got blocked, so we get another one from the readyQueue
             if (!interpreter.readyQueue.isEmpty()) {
                 currentProgram = interpreter.readyQueue.poll();
+                interpreter.changeState();
                 counter = 0;
             }
         }
@@ -78,11 +85,18 @@ public class Scheduler {
 
             if (time == arrivalTime.get(1)) {
                 interpreter.readyQueue.add((int) programs.get(0).x);
+                interpreter.addToMemory((int) programs.get(0).x);
+                interpreter.changeState();
             } else if (time == arrivalTime.get(2)) {
                 interpreter.readyQueue.add((int) programs.get(1).x);
-            } else if (time == arrivalTime.get(3)) {
-                interpreter.readyQueue.add((int) programs.get(2).x);
+                interpreter.addToMemory((int) programs.get(1).x);
+                interpreter.changeState();
             }
+//            else if (time == arrivalTime.get(3)) {
+//                interpreter.readyQueue.add((int) programs.get(2).x);
+//                interpreter.addToMemory((int) programs.get(2).x);
+//                interpreter.changeState();
+//            }
 
 
             if (currentProgram == 0) {
@@ -109,8 +123,10 @@ public class Scheduler {
                 if (counter == timeSlice) {
                     if (!interpreter.instructionQueue.get(currentProgram).isEmpty()) {
                         interpreter.readyQueue.add(currentProgram);
+                        interpreter.changeState();
                     }else {
                         System.out.println("Program No."+currentProgram+" has finished");
+                        interpreter.finishState(currentProgram);
                         System.out.println();
                     }
                     if (interpreter.readyQueue.isEmpty()) {
@@ -128,6 +144,7 @@ public class Scheduler {
                     }
                 } else {
                     if (interpreter.instructionQueue.get(currentProgram).isEmpty()) {
+                        interpreter.finishState(currentProgram);
                         System.out.println("Program No."+currentProgram+" has finished");
                         System.out.println();
                         if (!interpreter.readyQueue.isEmpty()) {
