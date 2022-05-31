@@ -70,6 +70,9 @@ public class Scheduler {
             //the current program got blocked, so we get another one from the readyQueue
             if (!interpreter.readyQueue.isEmpty()) {
                 currentProgram = interpreter.readyQueue.poll();
+                if(currentProgram == interpreter.lastIn){
+                    interpreter.swap();
+                }
                 interpreter.changeState();
                 counter = 0;
             }
@@ -91,12 +94,11 @@ public class Scheduler {
                 interpreter.readyQueue.add((int) programs.get(1).x);
                 interpreter.addToMemory((int) programs.get(1).x);
                 interpreter.changeState();
+            } else if (time == arrivalTime.get(3)) {
+                interpreter.readyQueue.add((int) programs.get(2).x);
+                interpreter.addToMemory((int) programs.get(2).x);
+                interpreter.changeState();
             }
-//            else if (time == arrivalTime.get(3)) {
-//                interpreter.readyQueue.add((int) programs.get(2).x);
-//                interpreter.addToMemory((int) programs.get(2).x);
-//                interpreter.changeState();
-//            }
 
 
             if (currentProgram == 0) {
@@ -105,12 +107,18 @@ public class Scheduler {
                         break;
                     } else {
                         currentProgram = interpreter.blocked.poll();
+                        if(currentProgram == interpreter.lastIn){
+                            interpreter.swap();
+                        }
                         counter = 0;
                         run(interpreter);
                     }
 
                 } else {
                     currentProgram = interpreter.readyQueue.poll();
+                    if(currentProgram == interpreter.lastIn){
+                        interpreter.swap();
+                    }
                     counter = 0;
                     run(interpreter);
 
@@ -134,11 +142,17 @@ public class Scheduler {
                             break;
                         } else {
                             currentProgram = interpreter.blocked.poll();
+                            if(currentProgram == interpreter.lastIn){
+                                interpreter.swap();
+                            }
                             counter = 0;
                             run(interpreter);
                         }
                     } else {
                         currentProgram = interpreter.readyQueue.poll();
+                        if(currentProgram == interpreter.lastIn){
+                            interpreter.swap();
+                        }
                         counter = 0;
                         run(interpreter);
                     }
@@ -149,11 +163,17 @@ public class Scheduler {
                         System.out.println();
                         if (!interpreter.readyQueue.isEmpty()) {
                             currentProgram = interpreter.readyQueue.poll();
+                            if(currentProgram == interpreter.lastIn){
+                                interpreter.swap();
+                            }
                             counter = 0;
                             run(interpreter);
                         } else {
                             if (!interpreter.blocked.isEmpty()) {
                                 currentProgram = interpreter.blocked.poll();
+                                if(currentProgram == interpreter.lastIn){
+                                    interpreter.swap();
+                                }
                                 counter = 0;
                                 run(interpreter);
                             } else {

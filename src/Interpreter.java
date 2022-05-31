@@ -26,6 +26,7 @@ public class Interpreter {
     ArrayList<Pair> programs;
     HashMap<Integer, List <String>> programQueue = new HashMap<>();
     int lastIn = 0;
+    int c = 1;
 
     public Interpreter(ArrayList<Pair> programs){
         this.programs = programs;
@@ -97,11 +98,12 @@ public class Interpreter {
     public void writeInDisk(int pid) {
         String fileName = "src/hardDisk.txt";
         lastIn=pid;
-        String previous = readFile("hardDisk");
         try {
+            String previous = readFile("hardDisk");
             FileWriter myWriter = new FileWriter(fileName);
             myWriter.write(previous);
-            myWriter.write(System.lineSeparator());
+            myWriter.write(c);
+            c++;
             for (Object o :memoryPrograms.get(pid)) {
                 if (o instanceof List<?>){
                     for (String s:(List<String>) o) {
@@ -113,8 +115,11 @@ public class Interpreter {
                     myWriter.write(System.lineSeparator());
                 }
             }
+            myWriter.write(System.lineSeparator());
+            myWriter.write("----------------------------------------------------------------------------------------");
+            myWriter.write(System.lineSeparator());
             myWriter.close();
-            System.out.println("Successfully wrote to the file.");
+            System.out.println("PID No."+ pid +" entered hardDisk.");
         } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
@@ -340,17 +345,43 @@ public class Interpreter {
             if (!((String)((ArrayList<Object>)memory[0]).get(1)).equals("Running")){
                 // Write to Hard-Disk
                 writeInDisk((int) ((ArrayList<Object>)memory[0]).get(0));
+                end = sizeInMemory -1;
+                ((Pair) memoryPrograms.get(pid).get(3)).x = 0;
+                ((Pair) memoryPrograms.get(pid).get(3)).y = end;
+
                 memory[0] = memoryPrograms.get(pid);
             }
             else {
                 // Write to Hard-Disk
                 writeInDisk((int) ((ArrayList<Object>)memory[20]).get(0));
+                start = ((int) ((Pair) ((ArrayList<Object>)memory[20]).get(3)).x);
+                end = start + sizeInMemory -1;
+                ((Pair) memoryPrograms.get(pid).get(3)).x = start;
+                ((Pair) memoryPrograms.get(pid).get(3)).y = end;
                 memory[20] = memoryPrograms.get(pid);
             }
         }
         Boundaries.put(pid, new Pair(start,end));
     }
-
+    public void swap(){
+        System.out.println(((String)((ArrayList<Object>)memory[0]).get(1)));
+        if (!((String)((ArrayList<Object>)memory[0]).get(1)).equals("Running")){
+            // Write to Hard-Disk
+            int temp = lastIn;
+            writeInDisk((int) ((ArrayList<Object>)memory[0]).get(0));
+            ((Pair) memoryPrograms.get(lastIn).get(3)).x = 0;
+            ((Pair) memoryPrograms.get(lastIn).get(3)).x = 7 + programQueue.get(lastIn).size() -1;
+            memory[0] = memoryPrograms.get(temp);
+        }
+        else {
+            // Write to Hard-Disk
+            int temp = lastIn;
+            writeInDisk((int) ((ArrayList<Object>)memory[20]).get(0));
+            ((Pair) memoryPrograms.get(lastIn).get(3)).x = 20;
+            ((Pair) memoryPrograms.get(lastIn).get(3)).y = 7 + programQueue.get(lastIn).size() -1 + 20;
+            memory[20] = memoryPrograms.get(temp);
+        }
+    }
     public void displayMemory(){
         ArrayList<Object> tempoMemo = new ArrayList<>();
         int c = 0;
@@ -407,7 +438,6 @@ public class Interpreter {
             }
         }
         System.out.println(tempoMemo.toString());
-        System.out.println(tempoMemo.size());
     }
 
     public void execute(int pid) {
