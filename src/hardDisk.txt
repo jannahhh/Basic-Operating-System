@@ -1,24 +1,7 @@
-1
-Ready
-8
-( 15, 15 )
-semWait userInput
-input
-assign a
-input
-assign c
-semSignal userInput
-semWait userOutput
-printFromTo a c
-semSignal userOutput
-( a, 1 )
-( c, 4 )
-
-----------------------------------------------------------------------------------------
-2
+2
 Blocked
 0
-( 16, 31 )
+( 20, 31 )
 semWait userInput
 input
 assign a
@@ -30,7 +13,7 @@ writeFile a b
 semSignal file
 
 ----------------------------------------------------------------------------------------
-1
+1
 Ready
 6
 ( 0, 15 )
@@ -47,42 +30,10 @@ semSignal userOutput
 ( c, 4 )
 
 ----------------------------------------------------------------------------------------
-2
-Blocked
-0
-( 16, 31 )
-semWait userInput
-input
-assign a
-input
-assign b
-semSignal userInput
-semWait file
-writeFile a b
-semSignal file
-
-----------------------------------------------------------------------------------------
-1
-Ready
-6
-( 0, 15 )
-semWait userInput
-input
-assign a
-input
-assign c
-semSignal userInput
-semWait userOutput
-printFromTo a c
-semSignal userOutput
-( a, 1 )
-( c, 4 )
-
-----------------------------------------------------------------------------------------
-2
+2
 Ready
 2
-( 16, 31 )
+( 0, 15 )
 semWait userInput
 input
 assign a
@@ -94,158 +45,27 @@ writeFile a b
 semSignal file
 
 ----------------------------------------------------------------------------------------
-1
+1
 Ready
 8
-( 15, 15 )
-semWait userInput
-input
-assign a
-input
-assign c
-semSignal userInput
-semWait userOutput
-printFromTo a c
-semSignal userOutput
-( a, 1 )
-( c, 4 )
-
-----------------------------------------------------------------------------------------
-2
-Ready
-4
-( 15, 31 )
-semWait userInput
-input
-assign a
-input
-assign b
-semSignal userInput
-semWait file
-writeFile a b
-semSignal file
-( a, uzumaki )
-
-----------------------------------------------------------------------------------------
-1
-Finished
-9
-( 15, 15 )
-semWait userInput
-input
-assign a
-input
-assign c
-semSignal userInput
-semWait userOutput
-printFromTo a c
-semSignal userOutput
-( a, 1 )
-( c, 4 )
-
-----------------------------------------------------------------------------------------
-2
-Blocked
-0
-semWait userInput
-input
-assign a
-input
-assign b
-semSignal userInput
-semWait file
-writeFile a b
-semSignal file
-( 20, 35 )
-
-----------------------------------------------------------------------------------------
-2
-Blocked
-0
-semWait userInput
-input
-assign a
-input
-assign b
-semSignal userInput
-semWait file
-writeFile a b
-semSignal file
-( 20, 35 )
-
-----------------------------------------------------------------------------------------
-2
-Blocked
-0
-( 0, 0 )
-semWait userInput
-input
-assign a
-input
-assign b
-semSignal userInput
-semWait file
-writeFile a b
-semSignal file
-( 20, 35 )
-
-----------------------------------------------------------------------------------------
-1
-Ready
-6
-( 0, 0 )
-semWait userInput
-input
-assign a
-input
-assign c
-semSignal userInput
-semWait userOutput
-printFromTo a c
-semSignal userOutput
 ( 0, 15 )
+semWait userInput
+input
+assign a
+input
+assign c
+semSignal userInput
+semWait userOutput
+printFromTo a c
+semSignal userOutput
 ( a, 1 )
 ( c, 4 )
 
 ----------------------------------------------------------------------------------------
-2
-Ready
 2
-( 0, 0 )
-semWait userInput
-input
-assign a
-input
-assign b
-semSignal userInput
-semWait file
-writeFile a b
-semSignal file
-( 20, 35 )
-
-----------------------------------------------------------------------------------------
-1
-Ready
-8
-( 15, 0 )
-semWait userInput
-input
-assign a
-input
-assign c
-semSignal userInput
-semWait userOutput
-printFromTo a c
-semSignal userOutput
-( 0, 15 )
-( a, 1 )
-( c, 4 )
-
-----------------------------------------------------------------------------------------
-2
 Ready
 4
-( 15, 0 )
+( 0, 15 )
 semWait userInput
 input
 assign a
@@ -255,14 +75,13 @@ semSignal userInput
 semWait file
 writeFile a b
 semSignal file
-( 20, 35 )
-( a, oklahama )
+( a, alpha )
 
 ----------------------------------------------------------------------------------------
-1
+1
 Finished
 9
-( 15, 0 )
+( 0, 15 )
 semWait userInput
 input
 assign a
@@ -272,105 +91,7 @@ semSignal userInput
 semWait userOutput
 printFromTo a c
 semSignal userOutput
-( 0, 15 )
 ( a, 1 )
 ( c, 4 )
-
-----------------------------------------------------------------------------------------
-2
-Blocked
-0
-( 16, 31 )
-semWait userInput
-input
-assign a
-input
-assign b
-semSignal userInput
-semWait file
-writeFile a b
-semSignal file
-
-----------------------------------------------------------------------------------------
-1
-Ready
-6
-( 0, 15 )
-semWait userInput
-input
-assign a
-input
-assign c
-semSignal userInput
-semWait userOutput
-printFromTo a c
-semSignal userOutput
-( a, 1 )
-( c, 5 )
-
-----------------------------------------------------------------------------------------
-2
-Ready
-2
-( 16, 31 )
-semWait userInput
-input
-assign a
-input
-assign b
-semSignal userInput
-semWait file
-writeFile a b
-semSignal file
-
-----------------------------------------------------------------------------------------
-1
-Ready
-8
-( 15, 15 )
-semWait userInput
-input
-assign a
-input
-assign c
-semSignal userInput
-semWait userOutput
-printFromTo a c
-semSignal userOutput
-( a, 1 )
-( c, 5 )
-
-----------------------------------------------------------------------------------------
-2
-Ready
-4
-( 15, 31 )
-semWait userInput
-input
-assign a
-input
-assign b
-semSignal userInput
-semWait file
-writeFile a b
-semSignal file
-( a, hitman )
-
-----------------------------------------------------------------------------------------
-1
-Finished
-9
-( 15, 15 )
-semWait userInput
-input
-assign a
-input
-assign c
-semSignal userInput
-semWait userOutput
-printFromTo a c
-semSignal userOutput
-( a, 1 )
-( c, 5 )
 
 ----------------------------------------------------------------------------------------

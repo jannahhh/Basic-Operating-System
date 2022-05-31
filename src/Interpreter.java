@@ -29,13 +29,12 @@ public class Interpreter {
     int c = 1;
 
     public Interpreter(ArrayList<Pair> programs){
+        resetDisk();
         this.programs = programs;
         for (Pair p: programs) {
             instructionQueue.put((Integer) p.x, new LinkedList<>());
             execute((Integer) p.x);
             memoryPrograms.put((Integer) p.x, new ArrayList<>());
-//            addToMemory((Integer) p.x);
-//            writeInDisk((Integer) p.x);
         }
     }
 
@@ -95,6 +94,18 @@ public class Interpreter {
         }
 
     }
+    public void resetDisk(){
+        String fileName = "src/hardDisk.txt";
+        try {
+            FileWriter myWriter = new FileWriter(fileName);
+            myWriter.write("");
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+
+    }
     public void writeInDisk(int pid) {
         String fileName = "src/hardDisk.txt";
         lastIn=pid;
@@ -102,8 +113,6 @@ public class Interpreter {
             String previous = readFile("hardDisk");
             FileWriter myWriter = new FileWriter(fileName);
             myWriter.write(previous);
-            myWriter.write(c);
-            c++;
             for (Object o :memoryPrograms.get(pid)) {
                 if (o instanceof List<?>){
                     for (String s:(List<String>) o) {
@@ -340,11 +349,14 @@ public class Interpreter {
         if (memory[0] == null){
             memory[0] = memoryPrograms.get(pid);
         }else if(memory[20] == null){
+            ((Pair) memoryPrograms.get(pid).get(3)).x = 20;
+            start = 20;
             memory[20] = memoryPrograms.get(pid);
         }else {
             if (!((String)((ArrayList<Object>)memory[0]).get(1)).equals("Running")){
                 // Write to Hard-Disk
                 writeInDisk((int) ((ArrayList<Object>)memory[0]).get(0));
+                start = 0;
                 end = sizeInMemory -1;
                 ((Pair) memoryPrograms.get(pid).get(3)).x = 0;
                 ((Pair) memoryPrograms.get(pid).get(3)).y = end;
@@ -354,14 +366,14 @@ public class Interpreter {
             else {
                 // Write to Hard-Disk
                 writeInDisk((int) ((ArrayList<Object>)memory[20]).get(0));
-                start = ((int) ((Pair) ((ArrayList<Object>)memory[20]).get(3)).x);
-                end = start + sizeInMemory -1;
-                ((Pair) memoryPrograms.get(pid).get(3)).x = start;
+                start = 20;
+                end = 20 + sizeInMemory -1;
+                ((Pair) memoryPrograms.get(pid).get(3)).x = 20;
                 ((Pair) memoryPrograms.get(pid).get(3)).y = end;
                 memory[20] = memoryPrograms.get(pid);
             }
         }
-        Boundaries.put(pid, new Pair(start,end));
+//        Boundaries.put(pid, new Pair(start,end));
     }
     public void swap(){
         System.out.println(((String)((ArrayList<Object>)memory[0]).get(1)));
@@ -369,16 +381,16 @@ public class Interpreter {
             // Write to Hard-Disk
             int temp = lastIn;
             writeInDisk((int) ((ArrayList<Object>)memory[0]).get(0));
-            ((Pair) memoryPrograms.get(lastIn).get(3)).x = 0;
-            ((Pair) memoryPrograms.get(lastIn).get(3)).x = 7 + programQueue.get(lastIn).size() -1;
+            ((Pair) memoryPrograms.get(temp).get(3)).x = 0;
+            ((Pair) memoryPrograms.get(temp).get(3)).y = 7 + programQueue.get(temp).size() -1;
             memory[0] = memoryPrograms.get(temp);
         }
         else {
             // Write to Hard-Disk
             int temp = lastIn;
             writeInDisk((int) ((ArrayList<Object>)memory[20]).get(0));
-            ((Pair) memoryPrograms.get(lastIn).get(3)).x = 20;
-            ((Pair) memoryPrograms.get(lastIn).get(3)).y = 7 + programQueue.get(lastIn).size() -1 + 20;
+            ((Pair) memoryPrograms.get(temp).get(3)).x = 20;
+            ((Pair) memoryPrograms.get(temp).get(3)).y = 7 + programQueue.get(temp).size() -1 + 20;
             memory[20] = memoryPrograms.get(temp);
         }
     }
@@ -404,7 +416,7 @@ public class Interpreter {
                     c++;
                 }
             }
-            while(c <= b1){
+            while(c < 20){
                 tempoMemo.add("");
                 c++;
             }
