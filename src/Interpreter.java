@@ -18,7 +18,6 @@ public class Interpreter {
     Queue<Integer> fileBlocked = new LinkedList<>();
 //  -----------------------------------------------------
     int start = 0;
-    HashMap<Integer,Pair> Boundaries = new HashMap<>();
     HashMap<Integer, ArrayList<Object>> memoryPrograms = new HashMap<>();
     Object [] memory = new Object[40];
     HashMap<Integer, Queue<String>> instructionQueue = new HashMap<>();
@@ -26,7 +25,6 @@ public class Interpreter {
     ArrayList<Pair> programs;
     HashMap<Integer, List <String>> programQueue = new HashMap<>();
     int lastIn = 0;
-    int c = 1;
 
     public Interpreter(ArrayList<Pair> programs){
         resetDisk();
@@ -376,7 +374,7 @@ public class Interpreter {
 //        Boundaries.put(pid, new Pair(start,end));
     }
     public void swap(){
-        System.out.println(((String)((ArrayList<Object>)memory[0]).get(1)));
+
         if (!((String)((ArrayList<Object>)memory[0]).get(1)).equals("Running")){
             // Write to Hard-Disk
             int temp = lastIn;
@@ -384,6 +382,7 @@ public class Interpreter {
             ((Pair) memoryPrograms.get(temp).get(3)).x = 0;
             ((Pair) memoryPrograms.get(temp).get(3)).y = 7 + programQueue.get(temp).size() -1;
             memory[0] = memoryPrograms.get(temp);
+            System.out.println("PID No." + temp + " entered memory");
         }
         else {
             // Write to Hard-Disk
@@ -392,6 +391,7 @@ public class Interpreter {
             ((Pair) memoryPrograms.get(temp).get(3)).x = 20;
             ((Pair) memoryPrograms.get(temp).get(3)).y = 7 + programQueue.get(temp).size() -1 + 20;
             memory[20] = memoryPrograms.get(temp);
+            System.out.println("PID No." + temp + " entered memory");
         }
     }
     public void displayMemory(){

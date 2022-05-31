@@ -43,6 +43,7 @@ semSignal userInput
 semWait file
 writeFile a b
 semSignal file
+( a, first )
 
 ----------------------------------------------------------------------------------------
 1
@@ -75,7 +76,8 @@ semSignal userInput
 semWait file
 writeFile a b
 semSignal file
-( a, alpha )
+( a, first )
+( b, second )
 
 ----------------------------------------------------------------------------------------
 1

@@ -68,6 +68,7 @@ public class Scheduler {
             }
         } else {
             //the current program got blocked, so we get another one from the readyQueue
+            interpreter.instructionQueue.get(currentProgram).remove();
             if (!interpreter.readyQueue.isEmpty()) {
                 currentProgram = interpreter.readyQueue.poll();
                 if(currentProgram == interpreter.lastIn){
